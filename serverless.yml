@@ -1,0 +1,75 @@
+service: lambda-firebase-auth 
+
+frameworkVersion: ">=1.1.0 <2.0.0"
+
+provider:
+  name: aws
+  runtime: nodejs8.10
+  region: ap-southeast-1
+  profile: serverless-admin
+  environment:
+    DB_URL: ${file(./secrets.json):DB_URL}
+    AUTH_DOMAIN: ${file(./secrets.json):AUTH_DOMAIN}
+    KEY: ${file(./secrets.json):KEY}
+    STORAGE_URL: ${file(./secrets.json):STORAGE_URL}
+
+functions:
+  auth:
+    handler: authorizer.auth
+    cors: true
+  get:
+    handler: get.getUser
+    events:
+      - http:
+          path: users/{id}
+          method: get
+          cors: true
+  list:
+    handler: list.list
+    events:
+      - http:
+          path: users
+          method: get
+          authorizer: auth
+          cors: true
+  create:
+    handler: create.create
+    events:
+      - http:
+          path: users
+          method: post
+          cors: true
+  login:
+    handler: login.login
+    events:
+      - http:
+          path: login
+          method: post
+          cors: true
+    
+resources:
+  Resources:
+    # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+    GatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: EXPIRED_TOKEN
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+    AuthFailureGatewayResponse:
+      Type: 'AWS::ApiGateway::GatewayResponse'
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: 'ApiGatewayRestApi'
+        StatusCode: '401'
+        
+plugins:
+- serverless-offline

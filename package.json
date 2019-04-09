@@ -1,0 +1,20 @@
+{
+  "name": "lambda-firebase-auth",
+  "version": "1.0.0",
+  "description": "",
+  "main": "handler.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npm rebuild grpc --target=8.1.0 --target_arch=x64 --target_platform=linux --target_libc=glibc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "firebase": "^5.9.3",
+    "firebase-admin": "^7.2.0"
+  },
+  "devDependencies": {
+    "serverless-offline": "^4.9.4"
+  }
+}
